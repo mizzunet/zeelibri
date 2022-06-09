@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	// "log"
 	"os"
@@ -10,21 +11,40 @@ import (
 )
 
 func main() {
-	query := strings.Join(os.Args[1:], " ")
-	if query == "" {
+	var b z.Book
+	Path := flag.String("p", "./", "Download path")
+	IsFirst := flag.Bool("f", false, "Download first match")
+	Items := flag.Int("n", 10, "Number of items to display")
+
+	// Search
+	Query := strings.Join(os.Args[1:], " ")
+	if Query == "" {
 		panic("Search for something\n")
 	}
-	fmt.Printf("Searching for %s...\n\n", query)
-	books, err := z.Search(query)
+	books, err := z.Search(Query)
 	if err != nil {
 		panic(err)
 	}
-	b := books[0]
+
+	// Pre-download
+	var number int
+	if *IsFirst == true {
+		number = 0
+	} else {
+		for i := 0; i < *Items; i++ {
+			fmt.Printf("%v. %s by %s\n", i+1, books[i].Title, books[i].Author)
+			fmt.Printf("   %v %s - %s\n", books[i].Size.Bytes, books[i].Size.Unit, books[i].Format)
+		}
+		fmt.Scanln(&number)
+	}
+
+	// Download
+	b = books[number-1]
+	fmt.Printf("Downloading...\n")
 	fmt.Printf("Title : %s\n", b.Title)
 	fmt.Printf("Author: %s\n", b.Author)
 	fmt.Printf("Size: %v %s\n", b.Size.Bytes, b.Size.Unit)
-
-	err = b.Download("download")
+	err = b.Download(*Path)
 	if err != nil {
 		panic(err)
 	}

@@ -23,13 +23,15 @@ type Book struct {
 }
 
 const Filters = "?extensions[]=epub"
+
 const Domain = "https://1lib.in/s/"
-const Fallback = "https://u1lib.org/s/"
+
+// const Domain = "https://u1lib.org/s/"
 
 func Search(Query string) ([]Book, error) {
 	var book Book
 	var Results []Book
-	URL := Domain + strings.ReplaceAll(Query, " ", "+")
+	URL := Domain + strings.ReplaceAll(Query, " ", "+") + Filters
 
 	c := colly.NewCollector(colly.CacheDir("cache"))
 	// Grab details from search results
@@ -48,7 +50,7 @@ func Search(Query string) ([]Book, error) {
 
 	// error on no results
 	if len(Results) == 0 {
-		return Results, errors.New("Coudln't detect any books" + URL)
+		return Results, errors.New("Coudln't detect any books " + URL)
 	}
 
 	return Results, nil
