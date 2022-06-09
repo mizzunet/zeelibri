@@ -24,9 +24,9 @@ type Book struct {
 
 const Filters = "?extensions[]=epub"
 
-const Domain = "https://1lib.in/s/"
+// const Domain = "https://1lib.in/s/"
 
-// const Domain = "https://u1lib.org/s/"
+const Domain = "https://u1lib.org/s/"
 
 func Search(Query string) ([]Book, error) {
 	var book Book
@@ -56,7 +56,8 @@ func Search(Query string) ([]Book, error) {
 	return Results, nil
 }
 
-func (b Book) Download(Path string) error {
+func (b Book) Download(Path string) (string, error) {
+	var File *os.File
 	s := surf.NewBrowser()
 	Path = Path + "/"
 	FullPath := Path + strings.ReplaceAll(b.Title, " ", "_") + "." + b.Format
@@ -71,7 +72,7 @@ func (b Book) Download(Path string) error {
 	// Detect download button
 	_, bool := s.Find("a.addDownloadedBook").Attr("href")
 	if bool == false {
-		return errors.New("Failed to get downoad link form " + b.URL)
+		return FullPath, errors.New("Failed to get downoad link form " + b.URL)
 	}
 
 	// Click on dowlnoad
@@ -79,7 +80,7 @@ func (b Book) Download(Path string) error {
 
 	// Check if limit reached
 	if s.Find(".download-limits-error__header").Text() == "Daily limit reached" {
-		return errors.New("Daily limit reached")
+		return FullPath, errors.New("Daily limit reached")
 	}
 
 	// Folder making
@@ -89,22 +90,22 @@ func (b Book) Download(Path string) error {
 
 	// Check if file exists
 	if _, err := os.Stat(FullPath); !os.IsNotExist(err) {
-		return errors.New("File already been downloaded at " + FullPath)
+		return FullPath, errors.New("File already been downloaded at " + FullPath)
 	}
 
 	// Create file
 	File, err := os.Create(FullPath)
 	if err != nil {
-		return errors.New("Failed to create file " + err.Error())
+		return FullPath, errors.New("Failed to create file " + err.Error())
 	}
 
 	// Download the book
 	_, err = s.Download(File)
 	if err != nil {
-		return errors.New("Failed to download: " + err.Error())
+		return FullPath, errors.New("Failed to download: " + err.Error())
 	}
 
 	defer File.Close()
 
-	return nil
+	return FullPath, nil
 }

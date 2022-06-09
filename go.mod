@@ -1,4 +1,4 @@
-module zeelibri
+module github.com/mizzunet/zeelibri
 
 go 1.18
 

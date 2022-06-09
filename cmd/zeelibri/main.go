@@ -35,15 +35,15 @@ func main() {
 			fmt.Printf("%v. %s by %s\n", i+1, books[i].Title, books[i].Author)
 			fmt.Printf("   %v %s - %s\n", books[i].Size.Bytes, books[i].Size.Unit, books[i].Format)
 		}
-		fmt.Scanln(&number)
+		fmt.Scanf("\n > %s", &number)
 	}
 
 	// Download
-	b = books[number-1]
+	b = books[number]
 	fmt.Printf("Downloading...\n")
 	fmt.Printf("Title : %s\n", b.Title)
 	fmt.Printf("Author: %s\n", b.Author)
-	fmt.Printf("Size: %v %s\n", b.Size.Bytes, b.Size.Unit)
+	fmt.Printf("Size: %v %s %s\n", b.Size.Bytes, b.Size.Unit, b.Format)
 	err = b.Download(*Path)
 	if err != nil {
 		panic(err)
